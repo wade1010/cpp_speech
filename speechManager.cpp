@@ -4,6 +4,10 @@
 #include "functional"
 #include "deque"
 #include "numeric"
+#include "unistd.h"
+#include <fstream>
+
+#define FILENAME "speech.csv"
 
 SpeechManager::SpeechManager() {
     this->initSpeech();
@@ -35,6 +39,7 @@ void SpeechManager::initSpeech() {
     this->vVictory.clear();
     this->m_Speaker.clear();
     this->m_Index = 1;
+    this->m_Record.clear();
 }
 
 void SpeechManager::createSpeaker() {
@@ -64,6 +69,8 @@ void SpeechManager::startSpeech() {
     this->showScore();
 
     //第二轮比赛
+    cout << "\n休息3后进行第二轮比赛：" << endl;
+    sleep(3);
     this->m_Index++;
 
     //1 抽签
@@ -73,6 +80,8 @@ void SpeechManager::startSpeech() {
     //3 显示最终结果
     this->showScore();
     //4 保存分数
+    this->saveRecord();
+    cout << "本次比赛结束" << endl;
 }
 
 void SpeechManager::speechDraw() {
@@ -163,3 +172,91 @@ void SpeechManager::showScore() {
              << this->m_Speaker[id].m_Score[this->m_Index - 1] << endl;
     }
 }
+
+void SpeechManager::saveRecord() {
+    ofstream ofs(FILENAME, ios::out | ios::app);
+    for (auto id:this->vVictory) {
+        ofs << id << "," << this->m_Speaker[id].m_Score[1] << ",";
+    }
+    ofs << endl;
+    //关闭
+    ofs.close();
+    cout << "记录已经保存" << endl;
+    this->fileIsEmpty = false;
+}
+
+void SpeechManager::cleanRecord() {
+    cout << "确认清空？" << endl;
+    cout << "Y：确定" << endl;
+    cout << "其他：返回" << endl;
+    string choice;
+    cin >> choice;
+    if (choice != "Y") {
+        return;
+    }
+    ofstream ofs(FILENAME, ios::trunc);
+    ofs.close();
+    this->initSpeech();
+    this->createSpeaker();
+    this->fileIsEmpty = true;
+    cout << "清空成功!" << endl;
+}
+
+void SpeechManager::loadRecord() {
+    ifstream ifs(FILENAME, ios::in);
+    if (!ifs.is_open()) {
+        this->fileIsEmpty = true;
+        cout << "文件不存在!" << endl;
+        ifs.close();
+        return;
+    }
+    char ch;
+    ifs >> ch;
+    if (ifs.eof()) {
+        cout << "往届记录为空" << endl;
+        this->fileIsEmpty = true;
+        ifs.close();
+        return;
+    }
+    this->fileIsEmpty = false;
+
+    ifs.putback(ch);//将上面读取的单个字符 返回来
+
+    //读取内容 解析
+    string data;
+    int index = 0;
+    while (ifs >> data) {
+        vector<string> v;
+        //c++没有split
+        int pos = -1;
+        int start = 0;
+        while (true) {
+            pos = data.find(string(","), start);
+            if (pos == -1) {
+                break;
+            }
+            string tmp = data.substr(start, pos - start);
+            v.push_back(tmp);
+            start = pos + 1;
+        }
+        this->m_Record.insert(make_pair(index++, v));
+    }
+    ifs.close();
+}
+
+void SpeechManager::showRecord() {
+    this->loadRecord();
+    if (this->fileIsEmpty) {
+        return;
+    }
+    for (auto m:this->m_Record) {
+        cout << "第" << (m.first + 1) << "届记录：" << endl;
+        for (int i = 0; i < m.second.size(); i++) {
+            if ((i + 1) % 2 == 0) {
+                cout << "第" << (i + 1) / 2 << "名，编号：" << m.second[i - 1] << " 分数：" << m.second[i] << endl;
+            }
+        }
+        cout << endl;
+    }
+}
+

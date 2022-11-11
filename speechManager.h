@@ -37,6 +37,23 @@ public:
     //显示分数
     void showScore();
 
+    //保存分数
+    void saveRecord();
+
+    //读取记录
+    void loadRecord();
+
+    //文件为空的标志
+    bool fileIsEmpty;
+    //往届记录
+    map<int, vector<string>> m_Record;
+
+    //显示往届得分
+    void showRecord();
+
+    //清空记录
+    void cleanRecord();
+
 public:
     //比赛选手 12人
     vector<int> v1;
