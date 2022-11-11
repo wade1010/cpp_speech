@@ -34,6 +34,9 @@ public:
     //比赛
     void speechContest();
 
+    //显示分数
+    void showScore();
+
 public:
     //比赛选手 12人
     vector<int> v1;

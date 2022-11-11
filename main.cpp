@@ -16,7 +16,6 @@ void testPrint(const map<int, Speaker> &m) {
 int main() {
     SpeechManager sm;
 //    testPrint(sm.m_Speaker);
-    sm.startSpeech();
 
     int choice;
     while (true) {
@@ -27,6 +26,7 @@ int main() {
 
         switch (choice) {
             case 1://开始比赛
+                sm.startSpeech();
                 break;
             case 2://查看记录
                 break;
